@@ -1,9 +1,10 @@
 name: Daily Dashboard Update
 
 on:
-  schedule:
-    - cron: '30 4 * * *'  # 10:00 AM IST daily
-  workflow_dispatch:        # allows manual trigger too
+  push:
+    paths:
+      - 'data/dashboard_data.json'  # triggers when Apps Script pushes data
+  workflow_dispatch:                 # manual trigger
 
 permissions:
   contents: write

@@ -1,15 +1,12 @@
 import json
 from datetime import datetime
-import os
 
 print("Reading dashboard data pushed by Apps Script...")
 
 with open('data/dashboard_data.json', 'r', encoding='utf-8') as f:
-    payload = json.load(f)
+    data = json.load(f)
 
-data        = payload['metrics']
-last_updated = payload.get('last_updated', datetime.now().strftime('%d %b %Y · %I:%M %p IST'))
-data['last_updated'] = last_updated
+last_updated = data.get('last_updated', datetime.now().strftime('%d %b %Y · %I:%M %p IST'))
 
 data_json = json.dumps(data, default=str)
 

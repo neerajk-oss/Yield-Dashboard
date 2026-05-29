@@ -1117,15 +1117,34 @@ function init() {
     var dcats=[...new Set(DDATA.daily_cat.map(function(r){return r.sub_cat;}))].sort();
     selectedDailyCat=dcats[0]||'';
   }
-  renderAll();
+  safeRender(renderAll,'All');
   wireEvents();
+  // Force hide loading after everything
+  setTimeout(function(){
+    var l=document.getElementById('loading');
+    if(l){l.style.display='none';l.style.pointerEvents='none';}
+  },100);
 }
 
+function safeRender(fn, name) {
+  try { fn(); } catch(e) { console.warn('Chart error in '+name+':', e.message); }
+}
 function renderAll() {
-  renderKPIs(); renderAlerts(); renderTrend(); renderDailyOverall(); renderMovers();
-  renderWaterfall(); renderQuadrant(); renderHeat(); renderCatTable();
-  renderCityView(); renderSkuTable(); renderDailyTrend();
-  renderDailyCatTable(); renderDailyCatChart(); renderDailySkuTable();
+  safeRender(renderKPIs,'KPIs');
+  safeRender(renderAlerts,'Alerts');
+  safeRender(renderTrend,'Trend');
+  safeRender(renderDailyOverall,'DailyOverall');
+  safeRender(renderMovers,'Movers');
+  safeRender(renderWaterfall,'Waterfall');
+  safeRender(renderQuadrant,'Quadrant');
+  safeRender(renderHeat,'Heat');
+  safeRender(renderCatTable,'CatTable');
+  safeRender(renderCityView,'CityView');
+  safeRender(renderSkuTable,'SkuTable');
+  safeRender(renderDailyTrend,'DailyTrend');
+  safeRender(renderDailyCatTable,'DailyCatTable');
+  safeRender(renderDailyCatChart,'DailyCatChart');
+  safeRender(renderDailySkuTable,'DailySkuTable');
 }
 
 function wireEvents() {

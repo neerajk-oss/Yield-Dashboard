@@ -23,7 +23,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* GATE */
 #gate{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
-#gate.hidden{display:none}
+#gate.hidden{display:none !important;pointer-events:none !important}
 .gate-box{background:var(--surf);border:1px solid var(--bdr);border-radius:24px;padding:52px 48px;max-width:440px;width:90%;text-align:center;box-shadow:0 40px 80px -20px rgba(0,0,0,.7)}
 .gate-logo{font-family:'Fraunces',serif;font-weight:900;font-size:36px;font-style:italic;color:var(--amber);letter-spacing:-.04em;margin-bottom:6px}
 .gate-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink4);margin-bottom:40px}
@@ -36,7 +36,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* LOADING */
 #loading{position:fixed;inset:0;background:var(--bg);z-index:8888;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
-#loading.hidden{display:none}
+#loading.hidden{display:none !important;pointer-events:none !important}
 .spinner{width:36px;height:36px;border:3px solid var(--bdr2);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .load-txt{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase}
@@ -488,7 +488,10 @@ function loadAll() {
     .then(function(r){ return r.json(); })
     .then(function(d){
       DDATA = d;
-      document.getElementById('loading').classList.add('hidden');
+      var loadEl = document.getElementById('loading');
+      loadEl.classList.add('hidden');
+      loadEl.style.display = 'none';
+      loadEl.style.pointerEvents = 'none';
       document.getElementById('dash').style.display = 'block';
       init();
     })

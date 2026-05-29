@@ -1117,46 +1117,66 @@ function init() {
     var dcats=[...new Set(DDATA.daily_cat.map(function(r){return r.sub_cat;}))].sort();
     selectedDailyCat=dcats[0]||'';
   }
-  safeRender(renderAll,'All');
+  // Force hide loading FIRST before anything else
+  var l=document.getElementById('loading');
+  if(l){l.style.display='none';l.style.pointerEvents='none';}
+  // Wire events immediately so page is interactive
   wireEvents();
-  // Force hide loading after everything
-  setTimeout(function(){
-    var l=document.getElementById('loading');
-    if(l){l.style.display='none';l.style.pointerEvents='none';}
-  },100);
+  // Then render overview tab only (lazy)
+  setTimeout(function(){ safeRender(renderOverview,'Overview'); }, 50);
 }
+
+function renderOverview() {
+  renderKPIs(); renderAlerts(); renderTrend(); renderDailyOverall(); renderMovers();
+  renderWaterfall(); renderQuadrant();
+}
+
+function renderMonthly() {
+  renderHeat(); renderCatTable();
+}
+
+function renderDaily() {
+  renderDailyTrend(); renderDailyCatTable(); renderDailyCatChart(); renderDailySkuTable();
+}
+
+function renderCities() { renderCityView(); }
+function renderSKUs() { renderSkuTable(); }
 
 function safeRender(fn, name) {
   try { fn(); } catch(e) { console.warn('Chart error in '+name+':', e.message); }
 }
 function renderAll() {
-  safeRender(renderKPIs,'KPIs');
-  safeRender(renderAlerts,'Alerts');
-  safeRender(renderTrend,'Trend');
-  safeRender(renderDailyOverall,'DailyOverall');
-  safeRender(renderMovers,'Movers');
-  safeRender(renderWaterfall,'Waterfall');
-  safeRender(renderQuadrant,'Quadrant');
-  safeRender(renderHeat,'Heat');
-  safeRender(renderCatTable,'CatTable');
-  safeRender(renderCityView,'CityView');
-  safeRender(renderSkuTable,'SkuTable');
-  safeRender(renderDailyTrend,'DailyTrend');
-  safeRender(renderDailyCatTable,'DailyCatTable');
-  safeRender(renderDailyCatChart,'DailyCatChart');
-  safeRender(renderDailySkuTable,'DailySkuTable');
+  safeRender(renderOverview,'Overview');
 }
 
 function wireEvents() {
   document.getElementById('acToggle').addEventListener('click',function(e){
     if(e.target.tagName!=='BUTTON')return;
     document.querySelectorAll('#acToggle button').forEach(function(b){b.classList.remove('on');});
-    e.target.classList.add('on');MODE=e.target.dataset.val;renderAll();
+    e.target.classList.add('on');MODE=e.target.dataset.val;
+    var activeTab=document.querySelector('.tab.active');
+    if(activeTab){
+      var tab=activeTab.dataset.tab;
+      if(tab==='overview') safeRender(renderOverview,'Overview');
+      else if(tab==='monthly') safeRender(renderMonthly,'Monthly');
+      else if(tab==='daily') safeRender(renderDaily,'Daily');
+      else if(tab==='cities') safeRender(renderCities,'Cities');
+      else if(tab==='skus') safeRender(renderSKUs,'SKUs');
+    }
   });
   document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){
     document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
     document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('active');});
-    t.classList.add('active');document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+    // Lazy render per tab
+    setTimeout(function(){
+      if(t.dataset.tab==='overview') safeRender(renderOverview,'Overview');
+      else if(t.dataset.tab==='monthly') safeRender(renderMonthly,'Monthly');
+      else if(t.dataset.tab==='daily') safeRender(renderDaily,'Daily');
+      else if(t.dataset.tab==='cities') safeRender(renderCities,'Cities');
+      else if(t.dataset.tab==='skus') safeRender(renderSKUs,'SKUs');
+    },30);
   });});
   document.getElementById('catSearch').addEventListener('input',renderCatTable);
   document.querySelectorAll('[data-sort]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[data-sort]').forEach(function(x){x.classList.remove('active');});b.classList.add('active');catSort=b.dataset.sort;renderCatTable();});});

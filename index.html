@@ -57,7 +57,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:10p
 .hdr-live{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink4);margin-top:3px}
 
 /* KPI STRIP */
-.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:16px;overflow:hidden;margin-bottom:28px}
+.kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:16px;overflow:hidden;margin-bottom:28px}
 .kpi{background:var(--surf);padding:22px 24px 18px;transition:background .3s}
 .kpi:hover{background:var(--surf2)}
 .kpi-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);margin-bottom:14px}
@@ -534,9 +534,8 @@ function renderKPIs() {
 
   var kpis = [
     {l:'Overall Yield &middot; '+lbl(lm), v:last.yield_pct.toFixed(2), u:'%', delta:d, dt:(d>0?'+':'')+d.toFixed(2)+' pp vs '+lbl(MDATA.months[MDATA.months.length-2])},
-    {l:'Active Categories', v:liveCats.size, u:'', delta:0, dt:'Latest month'},
-    {l:'Active Cities', v:liveCities.size, u:'', delta:0, dt:MDATA.months.length+' months tracked'},
-    {l:'Total Orders &middot; '+lbl(lm), v:(last.orders/1000).toFixed(1), u:'k', delta:0, dt:(last.items/1000).toFixed(1)+'k items'}
+    {l:'Active Categories &middot; '+lbl(lm), v:liveCats.size, u:'', delta:0, dt:'Categories with live data'},
+    {l:'Active Cities &middot; '+lbl(lm), v:liveCities.size, u:'', delta:0, dt:MDATA.months.length+' months tracked'}
   ];
   document.getElementById('kpis').innerHTML = kpis.map(function(k){
     return '<div class="kpi"><div class="kpi-lbl">'+k.l+'</div><div class="kpi-val">'+k.v+'<span class="u">'+k.u+'</span></div><div class="kpi-d '+dc(k.delta)+'">'+arrow(k.delta)+' '+k.dt+'</div></div>';

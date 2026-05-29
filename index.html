@@ -231,6 +231,13 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--bdr);display:
   </div>
 </header>
 
+
+<!-- DEBUG PANEL - remove after fixing -->
+<div id="debugPanel" style="background:#1A1714;border:1px solid #E8B048;border-radius:12px;padding:16px;margin-bottom:20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#C7BFB1">
+  <div style="color:#E8B048;margin-bottom:8px;font-weight:600">DEBUG INFO</div>
+  <div id="debugContent">Loading...</div>
+  <button onclick="document.getElementById('debugPanel').style.display='none'" style="margin-top:8px;background:transparent;border:1px solid #5C5750;color:#8A8478;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:10px">Hide</button>
+</div>
 <div class="kpi-strip" id="kpis"></div>
 
 <div class="alert-strip" id="alerts"></div>
@@ -1122,13 +1129,56 @@ function init() {
   if(l){l.style.display='none';l.style.pointerEvents='none';}
   // Wire events immediately so page is interactive
   wireEvents();
+  // DEBUG - show data info
+  try {
+    var dbg = document.getElementById('debugContent');
+    if(dbg) {
+      dbg.innerHTML =
+        'months: <strong style="color:#E8B048">' + JSON.stringify(MDATA.months) + '</strong><br>' +
+        'cat_month[0]: <strong style="color:#E8B048">' + JSON.stringify(MDATA.cat_month[0]) + '</strong><br>' +
+        'cat_month total: <strong style="color:#E8B048">' + MDATA.cat_month.length + '</strong><br>' +
+        'daily_overall[0]: <strong style="color:#8FB89A">' + (DDATA && DDATA.daily_overall ? JSON.stringify(DDATA.daily_overall[0]) : 'null') + '</strong>';
+    }
+  } catch(e) {}
   // Then render overview tab only (lazy)
   setTimeout(function(){ safeRender(renderOverview,'Overview'); }, 50);
 }
 
+
+// MOVERS
+function renderMovers() {
+  var lm=MDATA.months[MDATA.months.length-1];
+  var pm=MDATA.months.length>1?MDATA.months[MDATA.months.length-2]:null;
+  if(!pm){
+    document.getElementById('winners').innerHTML='<div style="color:var(--ink4);padding:12px 0;font-size:13px">Need 2+ months</div>';
+    document.getElementById('losers').innerHTML='';
+    return;
+  }
+  var cats=[];
+  MDATA.cat_month.forEach(function(r){if(cats.indexOf(r.sub_cat)===-1)cats.push(r.sub_cat);});
+  if(MODE==='no_ac')cats=cats.filter(function(c){return !/air condition/i.test(c);});
+  var rows=cats.map(function(cat){
+    var cm=MDATA.cat_month.find(function(r){return r.sub_cat===cat&&r.month_str===lm;});
+    var pp=MDATA.cat_month.find(function(r){return r.sub_cat===cat&&r.month_str===pm;});
+    if(!cm||!pp||(pp.orders||0)<50)return null;
+    return{cat:cat,cur:cm.yield_pct,delta:cm.yield_pct-pp.yield_pct};
+  }).filter(Boolean);
+  rows.sort(function(a,b){return b.delta-a.delta;});
+  var tpl=function(items){return items.map(function(i){
+    return '<div class="mr"><div class="mr-name">'+i.cat+'</div><div class="mr-vals"><div class="mr-cur">'+i.cur.toFixed(2)+'%</div><div class="mr-d '+(i.delta>=0?'up':'dn')+'">'+(i.delta>=0?'+':'')+i.delta.toFixed(2)+' pp</div></div></div>';
+  }).join('');};
+  document.getElementById('winners').innerHTML=tpl(rows.slice(0,5));
+  document.getElementById('losers').innerHTML=tpl(rows.slice(-5).reverse());
+}
+
 function renderOverview() {
-  renderKPIs(); renderAlerts(); renderTrend(); renderDailyOverall(); renderMovers();
-  renderWaterfall(); renderQuadrant();
+  safeRender(renderKPIs,'KPIs');
+  safeRender(renderAlerts,'Alerts');
+  safeRender(renderTrend,'Trend');
+  safeRender(renderDailyOverall,'DailyOverall');
+  safeRender(renderMovers,'Movers');
+  safeRender(renderWaterfall,'Waterfall');
+  safeRender(renderQuadrant,'Quadrant');
 }
 
 function renderMonthly() {
